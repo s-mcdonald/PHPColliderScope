@@ -1,0 +1,50 @@
+{
+  "name": "s-mcdonald/phpcolliderscope",
+  "description": "Assorted classes and functions for file handling",
+  "keywords": [],
+  "homepage": "https://github.com/s-mcdonald/PHPColliderScope",
+  "license": "MIT",
+  "version": "0.0.1",
+  "authors": [
+    {
+      "name": "Sam McDonald",
+      "email": "s.mcdonald@outlook.com.au",
+      "homepage": "https://github.com/s-mcdonald"
+    }
+  ],
+  "require": {
+    "php": ">=8.3",
+    "s-mcdonald/phpfskit": "^0.0.1",
+    "symfony/console": "^7.4",
+    "s-mcdonald/phpjson": "^2.1"
+  },
+  "require-dev": {
+    "roave/security-advisories": "dev-latest",
+    "phpunit/phpunit": "^10",
+    "mockery/mockery": "1.5.1"
+  },
+  "bin": [
+    "bin/collider"
+  ],
+  "autoload": {
+    "psr-4": {
+      "PHPColliderScope\\": "src/"
+    },
+    "files": [
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\PHPColliderScope\\": "test/"
+    }
+  },
+  "scripts": {
+    "ccstart": "docker compose up -d --build",
+    "ccstop": "docker compose down"
+  },
+  "minimum-stability" : "dev",
+  "prefer-stable" : true,
+  "suggest" : {
+    "s-mcdonald/jason" : "Json Serializer with php attributes"
+  }
+}

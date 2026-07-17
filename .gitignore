@@ -1,0 +1,11 @@
+
+# Hidden folders
+/.idea
+/.claude
+/.blocks
+
+# Lock files
+/.composer.lock
+
+# Packages
+/vendor

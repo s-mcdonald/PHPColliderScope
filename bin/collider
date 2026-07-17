@@ -1,0 +1,21 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use PHPColliderScope\Console\CheckCommand;
+use Symfony\Component\Console\Application;
+
+foreach ([__DIR__ . '/../vendor/autoload.php', __DIR__ . '/../../../autoload.php'] as $autoload) {
+    if (file_exists($autoload)) {
+        require $autoload;
+        break;
+    }
+}
+
+$command = new CheckCommand();
+
+$application = new Application('PHPColliderScope', '0.0.1');
+$application->add($command);
+$application->setDefaultCommand((string) $command->getName(), true);
+$application->run();
