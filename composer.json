@@ -1,6 +1,6 @@
 {
   "name": "s-mcdonald/phpcolliderscope",
-  "description": "Assorted classes and functions for file handling",
+  "description": "Check for php file, class and function namespace collisions.",
   "keywords": [],
   "homepage": "https://github.com/s-mcdonald/PHPColliderScope",
   "license": "MIT",
@@ -38,13 +38,6 @@
       "Tests\\PHPColliderScope\\": "test/"
     }
   },
-  "scripts": {
-    "ccstart": "docker compose up -d --build",
-    "ccstop": "docker compose down"
-  },
   "minimum-stability" : "dev",
-  "prefer-stable" : true,
-  "suggest" : {
-    "s-mcdonald/jason" : "Json Serializer with php attributes"
-  }
+  "prefer-stable" : true
 }

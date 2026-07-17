@@ -6,6 +6,7 @@
 
 # Lock files
 /.composer.lock
+.composer.lock
 
 # Packages
 /vendor
