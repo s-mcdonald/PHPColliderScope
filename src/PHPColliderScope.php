@@ -14,13 +14,21 @@ class PHPColliderScope
 {
     private string $workingDirectory;
 
-    public function __construct(string $startDirectory = __DIR__) 
+    public function __construct(string|Directory $directoryPath = __DIR__)
     {
-        $this->cd($startDirectory);
+        $this->cd($directoryPath);
     }
 
-    public function cd(string $directoryPath): void
+    public function cd(string|Directory $directoryPath): void
     {
+        if ($directoryPath instanceof Directory) {
+            $directoryPath = $directoryPath->path();
+        }
+
+        if (!is_dir($directoryPath)) {
+            throw new \InvalidArgumentException("Invalid start directory: $directoryPath");
+        }
+
         $this->workingDirectory = $directoryPath;
     }
 
