@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\PHPColliderScope\Unit\Console;
 
 use PHPColliderScope\Console\CheckCommand;
+use PHPColliderScope\ExitCode;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
@@ -29,7 +30,7 @@ final class CheckCommandTest extends TestCase
 
         $exitCode = $tester->execute(['path' => self::FIXTURES . '/does_not_exist']);
 
-        $this->assertSame(Command::INVALID, $exitCode);
+        $this->assertSame(ExitCode::InvalidDirectory, $exitCode);
         $this->assertStringContainsString('does not exist', $tester->getDisplay());
     }
 
@@ -50,7 +51,7 @@ final class CheckCommandTest extends TestCase
         $exitCode = $tester->execute(['path' => self::FIXTURES . '/contains_duplicates']);
         $display = $tester->getDisplay();
 
-        $this->assertSame(Command::FAILURE, $exitCode);
+        $this->assertSame(ExitCode::CollisionsFound, $exitCode);
         $this->assertStringContainsString('25 collision(s)', $display);
         $this->assertStringContainsString('--full', $display);
         // The summary form must not spell out individual occurrences.
@@ -67,7 +68,7 @@ final class CheckCommandTest extends TestCase
         ]);
         $display = $tester->getDisplay();
 
-        $this->assertSame(Command::FAILURE, $exitCode);
+        $this->assertSame(ExitCode::CollisionsFound, $exitCode);
         $this->assertStringContainsString('declaration(s) found', $display);
         $this->assertStringContainsString('Collide1', $display);
         $this->assertStringContainsString('.php:', $display);

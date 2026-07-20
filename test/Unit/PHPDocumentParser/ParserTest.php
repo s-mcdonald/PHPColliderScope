@@ -130,4 +130,51 @@ final class ParserTest extends TestCase
             $this->assertSame('php', strtolower(pathinfo($path, PATHINFO_EXTENSION)));
         }
     }
+
+    public function testByDefaultOnlyDotPhpFilesAreScanned(): void
+    {
+        $directory = Directory::createByFullPathString(self::FIXTURES . '/extensions');
+
+        $this->parser->inspect($directory);
+
+        $this->assertCount(1, $this->parser->documents());
+    }
+
+    public function testAdditionalFileExtensionsAreScannedWhenConfigured(): void
+    {
+        $directory = Directory::createByFullPathString(self::FIXTURES . '/extensions');
+
+        $this->parser->inspect($directory, new CollisionConfig(additionalFileExtensions: ['phtml']));
+
+        $documents = $this->parser->documents();
+        $this->assertCount(2, $documents);
+
+        $names = [];
+        foreach ($documents as $document) {
+            foreach ($document->declarations as $symbol) {
+                $names[] = $symbol->name;
+            }
+        }
+        sort($names);
+        $this->assertSame(['Template', 'Widget'], $names);
+    }
+
+    public function testInspectForCollisionsAlsoRespectsAdditionalFileExtensions(): void
+    {
+        $directory = Directory::createByFullPathString(self::FIXTURES . '/extensions');
+
+        $report = $this->parser->inspectForCollisions(
+            $directory,
+            new CollisionConfig(
+                findClassNamespaceCollision: true,
+                findFunctionNamespaceCollision: true,
+                additionalFileExtensions: ['phtml'],
+            ),
+        );
+
+        // Widget.php and template.phtml declare different classes, so no
+        // collision - this only asserts both files were actually scanned.
+        $this->assertCount(2, $this->parser->documents());
+        $this->assertFalse($report->hasCollisions());
+    }
 }

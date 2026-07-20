@@ -35,4 +35,47 @@ final class CollisionConfigTest extends TestCase
         $this->assertTrue($config->findClassNamespaceCollision);
         $this->assertTrue($config->findFunctionNamespaceCollision);
     }
+
+    public function testFileExtensionsAlwaysIncludesPhpByDefault(): void
+    {
+        $config = new CollisionConfig();
+
+        $this->assertSame(['php'], $config->fileExtensions);
+        $this->assertTrue($config->hasFileExtension('php'));
+    }
+
+    public function testAdditionalFileExtensionsAreAppendedToThePhpDefault(): void
+    {
+        $config = new CollisionConfig(additionalFileExtensions: ['phpt', 'phtml']);
+
+        $this->assertSame(['php', 'phpt', 'phtml'], $config->fileExtensions);
+        $this->assertTrue($config->hasFileExtension('phpt'));
+        $this->assertTrue($config->hasFileExtension('phtml'));
+    }
+
+    public function testAdditionalFileExtensionsAreNormalizedAndDeduplicated(): void
+    {
+        $config = new CollisionConfig(additionalFileExtensions: ['.PHTML', 'php', 'PhpT']);
+
+        $this->assertSame(['php', 'phtml', 'phpt'], $config->fileExtensions);
+    }
+
+    public function testHasFileExtensionIsCaseInsensitiveAndIgnoresALeadingDot(): void
+    {
+        $config = new CollisionConfig(additionalFileExtensions: ['phtml']);
+
+        $this->assertTrue($config->hasFileExtension('PHTML'));
+        $this->assertTrue($config->hasFileExtension('.phtml'));
+        $this->assertFalse($config->hasFileExtension('phps'));
+    }
+
+    public function testWithFileExtensionReturnsANewConfigWithTheExtensionAdded(): void
+    {
+        $original = new CollisionConfig();
+        $withPhtml = $original->withFileExtension('phtml');
+
+        $this->assertSame(['php'], $original->fileExtensions);
+        $this->assertSame(['php', 'phtml'], $withPhtml->fileExtensions);
+        $this->assertNotSame($original, $withPhtml);
+    }
 }

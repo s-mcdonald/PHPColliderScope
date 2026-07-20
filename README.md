@@ -30,7 +30,27 @@ composer require --dev s-mcdonald/phpcolliderscope
 Files that fail to parse are reported as warnings and skipped, rather than
 aborting the scan.
 
-## Programmatic usage: Building a file list with `FileSet`
+## Programmatic usage
+
+```php
+use FsKit\Directory;
+use PHPColliderScope\PHPDocumentParser\DeclarationExtractor;
+use PHPColliderScope\PHPDocumentParser\Parser;
+use PHPColliderScope\PHPDocumentParser\Tokenizers\PhpBuiltinTokenizer;
+use PHPColliderScope\PHPDocumentParser\Tokenizers\Tokenizer;
+
+$parser = new Parser(new DeclarationExtractor(new Tokenizer(new PhpBuiltinTokenizer())));
+
+$report = $parser->inspectForCollisions(Directory::createByFullPathString(__DIR__ . '/src'));
+
+if ($report->hasCollisions()) {
+    foreach ($report->collisions() as $collision) {
+        printf("%s\n", $collision->symbolName);
+    }
+}
+```
+
+### Building a file list with `FileSet`
 
 Scanning "a directory" isn't always what you want — real projects need to
 skip `vendor/`, test fixtures, generated code, etc. `FsKit\FileSet` builds an
@@ -40,7 +60,6 @@ single `Directory`:
 
 ```php
 use FsKit\FileSet;
-use PHPColliderScope\PHPDocumentParser\Parser;
 
 $fileSet = FileSet::createFromDir(__DIR__ . '/src')
     ->addDir(__DIR__ . '/modules')
@@ -51,9 +70,39 @@ $fileSet = FileSet::createFromDir(__DIR__ . '/src')
 $report = $parser->inspectFileSetForCollisions($fileSet);
 ```
 
-Each `add*`/`exclude*` call returns a new `FileSet` (they're immutable), and
-only `.php` files are ever inspected — everything else in the set is ignored
-automatically.
+Each `add*`/`exclude*` call returns a new `FileSet` (they're immutable).
+
+### Scanning additional file extensions
+
+By default only `.php` files are inspected — everything else in a
+`Directory` or `FileSet` is ignored automatically. If your project keeps PHP
+in files like `.phpt` or `.phtml`, pass a `CollisionConfig` with the extra
+extensions to either `inspectForCollisions()` or
+`inspectFileSetForCollisions()`:
+
+```php
+use PHPColliderScope\CollisionConfig;
+
+$config = new CollisionConfig(
+    findClassNamespaceCollision: true,
+    findFunctionNamespaceCollision: true,
+    additionalFileExtensions: ['phpt', 'phtml'],
+);
+
+$report = $parser->inspectForCollisions($directory, $config);
+```
+
+`CollisionConfig::default()` gives you the standard "find everything,
+`.php` only" config to build on, and `withFileExtension()` adds one more
+extension to an existing config without needing to reconstruct it from
+scratch:
+
+```php
+$config = CollisionConfig::default()->withFileExtension('phtml');
+```
+
+Extensions are matched case-insensitively and a leading `.` is optional —
+`'phtml'`, `'.phtml'`, and `'PHTML'` are all equivalent.
 
 ## CI/CD
 

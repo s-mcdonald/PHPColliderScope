@@ -23,13 +23,15 @@ class Parser
     ) {
     }
 
-    public function inspect(Directory $dir): void
+    public function inspect(Directory $dir, ?CollisionConfig $config = null): void
     {
+        $config ??= CollisionConfig::default();
+
         $documents = [];
         $skipped = [];
 
         foreach ($dir->ls(recursive: true)->files() as $file) {
-            if (strtolower($file->extension()) !== 'php') {
+            if (!$config->hasFileExtension($file->extension())) {
                 continue;
             }
 
@@ -44,13 +46,15 @@ class Parser
         $this->skippedFiles = $skipped;
     }
 
-    public function inspectFileSet(FileSet $fileSet): void
+    public function inspectFileSet(FileSet $fileSet, ?CollisionConfig $config = null): void
     {
+        $config ??= CollisionConfig::default();
+
         $documents = [];
         $skipped = [];
 
         foreach ($fileSet as $file) {
-            if (strtolower($file->extension()) !== 'php') {
+            if (!$config->hasFileExtension($file->extension())) {
                 continue;
             }
 
@@ -78,14 +82,18 @@ class Parser
 
     public function inspectForCollisions(Directory $dir, ?CollisionConfig $config = null): CollisionReport
     {
-        $this->inspect($dir);
+        $config ??= CollisionConfig::default();
+
+        $this->inspect($dir, $config);
 
         return new CollisionReport($this->documents, $config);
     }
 
     public function inspectFileSetForCollisions(FileSet $fileSet, ?CollisionConfig $config = null): CollisionReport
     {
-        $this->inspectFileSet($fileSet);
+        $config ??= CollisionConfig::default();
+
+        $this->inspectFileSet($fileSet, $config);
 
         return new CollisionReport($this->documents, $config);
     }

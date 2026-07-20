@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace PHPColliderScope\Console;
 
 use FsKit\Directory;
+use PHPColliderScope\ExitCode;
+use PHPColliderScope\LibConsts;
 use PHPColliderScope\PHPDocumentParser\DeclarationExtractor;
 use PHPColliderScope\PHPDocumentParser\Parser;
 use PHPColliderScope\PHPDocumentParser\Tokenizers\PhpBuiltinTokenizer;
@@ -49,7 +51,7 @@ final class CheckCommand extends Command
         if (!$directory->exists()) {
             $io->error(sprintf('Directory "%s" does not exist.', $directory->path()));
 
-            return Command::INVALID;
+            return ExitCode::InvalidDirectory;
         }
 
         $parser = new Parser(new DeclarationExtractor(new Tokenizer(new PhpBuiltinTokenizer())));
@@ -63,7 +65,7 @@ final class CheckCommand extends Command
         if (!$report->hasCollisions()) {
             $io->success('No collisions found.');
 
-            return Command::SUCCESS;
+            return ExitCode::NoCollisions;
         }
 
         $affectedFiles = [];
@@ -80,10 +82,10 @@ final class CheckCommand extends Command
             count($affectedFiles),
         ));
 
-        if (!$input->getOption('full')) {
+        if (!$input->getOption(LibConsts::COMMAND_FULL_OPTION)) {
             $io->writeln('Run again with <comment>--full</comment> for the file listing.');
 
-            return Command::FAILURE;
+            return ExitCode::CollisionsFound;
         }
 
         $documents = $parser->documents();
@@ -115,6 +117,6 @@ final class CheckCommand extends Command
             $io->newLine();
         }
 
-        return Command::FAILURE;
+        return ExitCode::CollisionsFound;
     }
 }
