@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\PHPColliderScope\Unit\PHPDocumentParser\Report;
 
 use FsKit\File;
+use PHPColliderScope\CollisionConfig;
 use PHPColliderScope\PHPDocumentParser\Document\PhpDocument;
 use PHPColliderScope\PHPDocumentParser\Document\Symbol;
 use PHPColliderScope\PHPDocumentParser\Document\SymbolKind;
@@ -115,5 +116,70 @@ final class CollisionReportTest extends TestCase
         ]);
 
         $this->assertTrue($report->hasCollisions());
+    }
+
+    /** @return array{0: PhpDocument, 1: PhpDocument} one class collision, one function collision */
+    private function mixedCollisionDocuments(): array
+    {
+        $fileA = File::createByFullFilenamePathString('/tmp/A.php');
+        $fileB = File::createByFullFilenamePathString('/tmp/B.php');
+
+        $docA = new PhpDocument($fileA, 'App', [
+            new Symbol(SymbolKind::ClassType, 'Widget', 'App', $fileA, 5),
+            new Symbol(SymbolKind::FunctionType, 'helper', 'App', $fileA, 20),
+        ]);
+        $docB = new PhpDocument($fileB, 'App', [
+            new Symbol(SymbolKind::ClassType, 'Widget', 'App', $fileB, 9),
+            new Symbol(SymbolKind::FunctionType, 'helper', 'App', $fileB, 30),
+        ]);
+
+        return [$docA, $docB];
+    }
+
+    public function testWithNoConfigBothClassAndFunctionCollisionsAreReported(): void
+    {
+        [$docA, $docB] = $this->mixedCollisionDocuments();
+
+        $report = new CollisionReport(['/tmp/A.php' => $docA, '/tmp/B.php' => $docB]);
+
+        $this->assertSame(2, $report->count());
+    }
+
+    public function testConfigCanRestrictToClassCollisionsOnly(): void
+    {
+        [$docA, $docB] = $this->mixedCollisionDocuments();
+
+        $report = new CollisionReport(
+            ['/tmp/A.php' => $docA, '/tmp/B.php' => $docB],
+            new CollisionConfig(findClassNamespaceCollision: true, findFunctionNamespaceCollision: false),
+        );
+
+        $this->assertSame(1, $report->count());
+        $this->assertSame('App\\Widget', $report->collisions()[0]->symbolName);
+    }
+
+    public function testConfigCanRestrictToFunctionCollisionsOnly(): void
+    {
+        [$docA, $docB] = $this->mixedCollisionDocuments();
+
+        $report = new CollisionReport(
+            ['/tmp/A.php' => $docA, '/tmp/B.php' => $docB],
+            new CollisionConfig(findClassNamespaceCollision: false, findFunctionNamespaceCollision: true),
+        );
+
+        $this->assertSame(1, $report->count());
+        $this->assertSame('App\\helper', $report->collisions()[0]->symbolName);
+    }
+
+    public function testConfigWithBothFlagsDisabledFindsNothing(): void
+    {
+        [$docA, $docB] = $this->mixedCollisionDocuments();
+
+        $report = new CollisionReport(
+            ['/tmp/A.php' => $docA, '/tmp/B.php' => $docB],
+            new CollisionConfig(findClassNamespaceCollision: false, findFunctionNamespaceCollision: false),
+        );
+
+        $this->assertFalse($report->hasCollisions());
     }
 }

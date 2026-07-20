@@ -6,6 +6,7 @@ namespace PHPColliderScope\PHPDocumentParser;
 
 use FsKit\Directory;
 use FsKit\FileSet;
+use PHPColliderScope\CollisionConfig;
 use PHPColliderScope\PHPDocumentParser\Document\PhpDocument;
 use PHPColliderScope\PHPDocumentParser\Report\CollisionReport;
 
@@ -75,17 +76,17 @@ class Parser
         return $this->documents;
     }
 
-    public function inspectForCollisions(Directory $dir): CollisionReport
+    public function inspectForCollisions(Directory $dir, ?CollisionConfig $config = null): CollisionReport
     {
         $this->inspect($dir);
 
-        return new CollisionReport($this->documents);
+        return new CollisionReport($this->documents, $config);
     }
 
-    public function inspectFileSetForCollisions(FileSet $fileSet): CollisionReport
+    public function inspectFileSetForCollisions(FileSet $fileSet, ?CollisionConfig $config = null): CollisionReport
     {
         $this->inspectFileSet($fileSet);
 
-        return new CollisionReport($this->documents);
+        return new CollisionReport($this->documents, $config);
     }
 }

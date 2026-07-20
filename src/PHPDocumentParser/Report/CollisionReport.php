@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PHPColliderScope\PHPDocumentParser\Report;
 
+use PHPColliderScope\CollisionConfig;
 use PHPColliderScope\PHPDocumentParser\Document\PhpDocument;
 use PHPColliderScope\PHPDocumentParser\Document\Symbol;
 
@@ -13,13 +14,23 @@ final readonly class CollisionReport
     private array $collisions;
 
     /** @param array<string, PhpDocument> $documents keyed by file path (value doesn't matter) */
-    public function __construct(array $documents = [])
+    public function __construct(array $documents = [], ?CollisionConfig $config = null)
     {
+        $config ??= CollisionConfig::default();
+
         /** @var array<string, list<Symbol>> $bySymbolKey */
         $bySymbolKey = [];
 
         foreach ($documents as $document) {
             foreach ($document->declarations as $symbol) {
+                if ($symbol->kind->isClassLike() && !$config->findClassNamespaceCollision) {
+                    continue;
+                }
+
+                if (!$symbol->kind->isClassLike() && !$config->findFunctionNamespaceCollision) {
+                    continue;
+                }
+
                 $bySymbolKey[$symbol->collisionKey()][] = $symbol;
             }
         }

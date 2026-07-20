@@ -6,6 +6,7 @@ namespace Tests\PHPColliderScope\Unit\PHPDocumentParser;
 
 use FsKit\Directory;
 use FsKit\FileSet;
+use PHPColliderScope\CollisionConfig;
 use PHPColliderScope\PHPDocumentParser\DeclarationExtractor;
 use PHPColliderScope\PHPDocumentParser\Parser;
 use PHPColliderScope\PHPDocumentParser\Tokenizers\PhpBuiltinTokenizer;
@@ -83,6 +84,40 @@ final class ParserTest extends TestCase
         // With every beta/ file excluded, no alpha/ file has a counterpart
         // left to collide with.
         $this->assertFalse($report->hasCollisions());
+    }
+
+    public function testInspectForCollisionsRespectsACollisionConfig(): void
+    {
+        $directory = Directory::createByFullPathString(self::FIXTURES . '/contains_duplicates');
+
+        // 25 total colliding pairs: 20 class-like (class/interface/trait/enum), 5 function.
+        $classesOnly = $this->parser->inspectForCollisions(
+            $directory,
+            new CollisionConfig(findClassNamespaceCollision: true, findFunctionNamespaceCollision: false),
+        );
+        $this->assertSame(20, $classesOnly->count());
+
+        $functionsOnly = $this->parser->inspectForCollisions(
+            $directory,
+            new CollisionConfig(findClassNamespaceCollision: false, findFunctionNamespaceCollision: true),
+        );
+        $this->assertSame(5, $functionsOnly->count());
+
+        $neither = $this->parser->inspectForCollisions($directory, new CollisionConfig());
+        $this->assertFalse($neither->hasCollisions());
+    }
+
+    public function testInspectFileSetForCollisionsRespectsACollisionConfig(): void
+    {
+        $fileSet = FileSet::createFromDir(self::FIXTURES . '/contains_duplicates/alpha')
+            ->addDir(self::FIXTURES . '/contains_duplicates/beta');
+
+        $report = $this->parser->inspectFileSetForCollisions(
+            $fileSet,
+            new CollisionConfig(findClassNamespaceCollision: false, findFunctionNamespaceCollision: true),
+        );
+
+        $this->assertSame(5, $report->count());
     }
 
     public function testNonPhpFilesAreIgnored(): void

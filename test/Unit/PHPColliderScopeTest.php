@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\PHPColliderScope\Unit;
 
+use PHPColliderScope\CollisionConfig;
 use PHPColliderScope\PHPColliderScope;
 use PHPUnit\Framework\TestCase;
 
@@ -46,5 +47,19 @@ final class PHPColliderScopeTest extends TestCase
         $output = ob_get_clean();
 
         $this->assertStringContainsString('Found 25 collision(s)', $output);
+    }
+
+    public function testCheckCollisionsRespectsACollisionConfig(): void
+    {
+        $scope = new PHPColliderScope(self::FIXTURES . '/contains_duplicates');
+
+        ob_start();
+        $scope->checkCollisions(
+            new CollisionConfig(findClassNamespaceCollision: false, findFunctionNamespaceCollision: true),
+        );
+        $output = ob_get_clean();
+
+        // Only the 5 function collisions should be reported, not the 20 class-like ones.
+        $this->assertStringContainsString('Found 5 collision(s)', $output);
     }
 }

@@ -10,7 +10,7 @@ use PHPColliderScope\PHPDocumentParser\Parser;
 use PHPColliderScope\PHPDocumentParser\Tokenizers\PhpBuiltinTokenizer;
 use PHPColliderScope\PHPDocumentParser\Tokenizers\Tokenizer;
 
-class PHPColliderScope
+final class PHPColliderScope
 {
     private string $workingDirectory;
 
@@ -65,7 +65,7 @@ class PHPColliderScope
         );
     }
 
-    public function checkCollisions(): void
+    public function checkCollisions(?CollisionConfig $config = null): void
     {
         $directory = Directory::createByFullPathString($this->workingDirectory);
 
@@ -78,7 +78,7 @@ class PHPColliderScope
 
         $parser = new Parser($extractor);
 
-        $report = $parser->inspectForCollisions($directory);
+        $report = $parser->inspectForCollisions($directory, $config);
 
         foreach ($parser->skippedFiles() as $skippedPath) {
             fwrite(STDERR, sprintf("Skipped (parse error): %s\n", $skippedPath));
