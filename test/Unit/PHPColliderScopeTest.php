@@ -4,10 +4,18 @@ declare(strict_types=1);
 
 namespace Tests\PHPColliderScope\Unit;
 
-use PHPColliderScope\CollisionConfig;
 use PHPColliderScope\PHPColliderScope;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * NOTE: PHPColliderScope::checkCollisions() calls exit() on every branch
+ * (no collisions, collisions found, and missing directory alike), and
+ * ::ls() calls exit() on its missing-directory branch. None of those
+ * branches can be exercised here without terminating the PHPUnit process,
+ * so only ls()'s non-exiting path is covered below. Coverage for the
+ * collision-reporting behaviour itself lives in CheckCommandTest, which
+ * goes through Symfony's Command return codes instead of exit().
+ */
 final class PHPColliderScopeTest extends TestCase
 {
     private const string FIXTURES = __DIR__ . '/../Fixtures';
@@ -36,30 +44,5 @@ final class PHPColliderScopeTest extends TestCase
 
         $this->assertStringContainsString('File26.php', $output);
         $this->assertStringNotContainsString('File1.php', $output);
-    }
-
-    public function testCheckCollisionsReportsCollisionsWithoutExiting(): void
-    {
-        $scope = new PHPColliderScope(self::FIXTURES . '/contains_duplicates');
-
-        ob_start();
-        $scope->checkCollisions();
-        $output = ob_get_clean();
-
-        $this->assertStringContainsString('Found 25 collision(s)', $output);
-    }
-
-    public function testCheckCollisionsRespectsACollisionConfig(): void
-    {
-        $scope = new PHPColliderScope(self::FIXTURES . '/contains_duplicates');
-
-        ob_start();
-        $scope->checkCollisions(
-            new CollisionConfig(findClassNamespaceCollision: false, findFunctionNamespaceCollision: true),
-        );
-        $output = ob_get_clean();
-
-        // Only the 5 function collisions should be reported, not the 20 class-like ones.
-        $this->assertStringContainsString('Found 5 collision(s)', $output);
     }
 }

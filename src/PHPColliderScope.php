@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PHPColliderScope;
 
 use FsKit\Directory;
+use JetBrains\PhpStorm\NoReturn;
 use PHPColliderScope\PHPDocumentParser\DeclarationExtractor;
 use PHPColliderScope\PHPDocumentParser\Parser;
 use PHPColliderScope\PHPDocumentParser\Tokenizers\PhpBuiltinTokenizer;
@@ -65,13 +66,14 @@ final class PHPColliderScope
         );
     }
 
+    #[NoReturn]
     public function checkCollisions(?CollisionConfig $config = null): void
     {
         $directory = Directory::createByFullPathString($this->workingDirectory);
 
         if (!$directory->exists()) {
             fwrite(STDERR, sprintf("Directory \"%s\" does not exist.\n", $directory->path()));
-            exit(1);
+            exit(ExitCode::InvalidDirectory);
         }
 
         $extractor = new DeclarationExtractor(new Tokenizer( new PhpBuiltinTokenizer()));
@@ -98,7 +100,7 @@ final class PHPColliderScope
 
         if (!$report->hasCollisions()) {
             echo "No collisions found.\n";
-            exit(0);
+            exit(ExitCode::NoCollisions);
         }
 
         printf("Found %d collision(s):\n\n", $report->count());
@@ -112,5 +114,7 @@ final class PHPColliderScope
 
             echo "\n";
         }
+
+        exit(ExitCode::CollisionsFound);
     }
 }
