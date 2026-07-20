@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PHPColliderScope\PHPDocumentParser\Document;
 
 use FsKit\File;
+use PHPColliderScope\LibConsts;
 
 final readonly class Symbol
 {
@@ -20,7 +21,7 @@ final readonly class Symbol
     public function fullyQualifiedName(): string
     {
         return ($this->namespace !== null && $this->namespace !== '')
-            ? $this->namespace . '\\' . $this->name
+            ? $this->namespace . LibConsts::NS . $this->name
             : $this->name;
     }
 

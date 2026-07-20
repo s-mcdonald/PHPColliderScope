@@ -42,7 +42,9 @@ final readonly class CollisionReport
         return $this->collisions !== [];
     }
 
-    /** @return Collision[] */
+    /**
+     * @return Collision[]
+     */
     public function collisions(): array
     {
         return $this->collisions;

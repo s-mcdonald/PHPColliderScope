@@ -8,7 +8,7 @@ use PHPColliderScope\PHPDocumentParser\Document\Symbol;
 
 final readonly class Collision
 {
-    /** @param list<Symbol> $occurrences always has 2+ entries */
+    /** @param list<Symbol> $occurrences */
     public function __construct(
         public string $symbolName,
         public array $occurrences,

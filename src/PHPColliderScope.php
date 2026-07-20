@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace PHPColliderScope;
 
 use FsKit\Directory;
-use PHPColliderScope\PHPDocumentParser\Parser;
 use PHPColliderScope\PHPDocumentParser\DeclarationExtractor;
-use PHPColliderScope\PHPDocumentParser\Tokenizers\Tokenizer;
+use PHPColliderScope\PHPDocumentParser\Parser;
 use PHPColliderScope\PHPDocumentParser\Tokenizers\PhpBuiltinTokenizer;
+use PHPColliderScope\PHPDocumentParser\Tokenizers\Tokenizer;
 
 class PHPColliderScope
 {
@@ -24,7 +24,7 @@ class PHPColliderScope
         $this->workingDirectory = $directoryPath;
     }
 
-    public function listFiles(bool $recursive = false): void
+    public function ls(bool $recursive = false): void
     {
         $directory = Directory::createByFullPathString($this->workingDirectory);
 
@@ -42,7 +42,7 @@ class PHPColliderScope
 
             printf(
                 "%-10s %-40s modified: %s\n",
-                $attributes->type(),
+                $attributes->type()->value,
                 $entry->name(),
                 $attributes->lastModified() !== null
                     ? date('Y-m-d H:i:s', $attributes->lastModified())
@@ -56,8 +56,6 @@ class PHPColliderScope
             count($listing->directories())
         );
     }
-
-
 
     public function checkCollisions(): void
     {
