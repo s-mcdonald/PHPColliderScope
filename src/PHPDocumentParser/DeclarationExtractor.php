@@ -254,8 +254,8 @@ final readonly class DeclarationExtractor
             }
 
             if ($id === T_STRING || $id === T_NS_SEPARATOR
-                || (defined('T_NAME_QUALIFIED') && $id === T_NAME_QUALIFIED)
-                || (defined('T_NAME_FULLY_QUALIFIED') && $id === T_NAME_FULLY_QUALIFIED)
+                || $id === T_NAME_QUALIFIED
+                || $id === T_NAME_FULLY_QUALIFIED
             ) {
                 $name .= $text;
                 continue;
